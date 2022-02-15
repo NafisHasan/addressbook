@@ -5,7 +5,38 @@ $userPass = "test";
 $database = "addressbook"; 
 
 $connectQuery = mysqli_connect($host,$userName,$userPass,$database);
+$msg="";
+$id="";
+$mode="";
+$city="";
+$state="";
+$country="";
 
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $mode = $_GET['mode'];
+}
+if ( $mode=="delete") {
+    mysqli_query($connectQuery,"DELETE FROM addressbook where id=$id");
+}
+if (isset($_GET['city'])) {
+    $city=legal_input($_GET['city']);
+}
+if (isset($_GET['country'])) {
+    $country=legal_input($_GET['country']);
+}
+if (isset($_GET['state'])) {
+    $state=legal_input($_GET['state']);
+}
+
+
+function legal_input($value) {
+    $value = trim($value);
+    $value = stripslashes($value);
+    $value = htmlspecialchars($value);
+    return $value;
+}
+if (empty($city) && empty($country) && empty($state)) {
 if(mysqli_connect_errno()){
     echo mysqli_connect_error();
     exit();
@@ -16,6 +47,33 @@ if(mysqli_connect_errno()){
     }else{
         $msg = "No Record found";
     }
+}
+}
+elseif(empty($state)){
+    if(mysqli_connect_errno()){
+        echo mysqli_connect_error();
+        exit();
+    }else{
+        $selectQuery = "SELECT * FROM `addressbook` WHERE city='$city' and country='$country' ORDER BY `id` ASC";
+        $result = mysqli_query($connectQuery,$selectQuery);
+        if(mysqli_num_rows($result) > 0){
+        }else{
+            $msg = "No Record found";
+        }
+    }
+}
+else{
+    if(mysqli_connect_errno()){
+        echo mysqli_connect_error();
+        exit();
+    }else{
+        $selectQuery = "SELECT * FROM `addressbook` WHERE city='$city' and country='$country' and state='$state' ORDER BY `id` ASC";
+        $result = mysqli_query($connectQuery,$selectQuery);
+        if(mysqli_num_rows($result) > 0){
+        }else{
+            $msg = "No Record found";
+        }
+    }  
 }
 ?>
 
@@ -30,6 +88,9 @@ if(mysqli_connect_errno()){
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 	<script>
+        function deleteevent() {
+            window.location.reload(true);
+        }
 		$(document).ready(function(){
         $("#newdata").click(function(){
             if($('#dataform').css('display') == 'none'){
@@ -40,6 +101,18 @@ if(mysqli_connect_errno()){
                 $('#dataform').hide();
                 $('#newdata').text('Add New Data');}
         });
+        $("#filterdata").click(function(){
+            if($('#filterform').css('display') == 'none'){
+                $('#filterform').show();
+                $('#filterdata').text('Close Filter');
+                }
+            else{
+                $('#filterform').hide();
+                $('#filterdata').text('Filter');
+                window.location.reload(true)}
+        });
+        
+        
         });
 
         $(document).on('submit','#dataform',function(e){
@@ -52,6 +125,7 @@ if(mysqli_connect_errno()){
         success: function(data){
         $('#msg').html(data);
         $('#dataform').find('input').val('')
+        window.location.reload(true)
 
     }});
 });
@@ -59,10 +133,10 @@ if(mysqli_connect_errno()){
 <title>Address Book</title>
 </head>
 <body>
-<h1 style="color:green;text-align:center;">Address Book</buton>
+<h1 style="color:green;text-align:center;">Address Book</h1>
 
 <div class="add" >
-    <button style="text-align:center;" id="newdata">Add New Data</h2>
+    <button style="text-align:center;" id="newdata">Add New Data</button>
     <p id="msg" style="text-align:center;"></p>
     <form id="dataform" method="POST" style="display:none;">
           <label>First Name</label>
@@ -71,23 +145,37 @@ if(mysqli_connect_errno()){
           <input type="text" placeholder="Enter Last Name" name="lastName" required>
           <label>Company Name</label>
           <input type="text" placeholder="Enter Company Name" name="comName" >
-          <label>Email Address</label>
-          <input type="email" placeholder="Enter Email Address" name="email" required>
           <label>City</label>
           <input type="city" placeholder="Enter Full City" name="city" required>
-          <label>Country</label>
-          <input type="text" placeholder="Enter Full Country" name="country" required>
           <label>State</label>
           <input type="text" placeholder="Enter Full State" name="state" >
+          <label>Country</label>
+          <input type="text" placeholder="Enter Full Country" name="country" required>
           <label>Address</label>
           <input type="text" placeholder="Enter Address" name="address" required>
+          <label>Email Address</label>
+          <input type="email" placeholder="Enter Email Address" name="email" required>
           <label>Telephone Number</label>
           <input type="number" placeholder="Enter Telephone Number" name="teleNumber" >
           <label>Phone Number</label>
           <input type="number" placeholder="Enter Phone Number" name="phoneNumber" >
           <button type="submit">Submit</button>
     </form>
-</div>  
+</div>
+<div class="add" >
+    <button style="text-align:center;" id="filterdata">Filter</button>
+    <form action="index.php" id="filterform" method="GET" style="display:none;">
+          
+          <label>City</label>
+          <input type="city" placeholder="Enter Full City" name="city" required>
+          <label>State</label>
+          <input type="text" placeholder="Enter Full State" name="state" >
+          <label>Country</label>
+          <input type="text" placeholder="Enter Full Country" name="country" required>
+          <button type="submit">Filter</button>
+    </form>
+</div> 
+    
     <table border="1px" style="width:80%; line-height:40px; margin-left: auto; margin-right: auto; border-collapse: collapse;">
         <thead>
             <tr>
@@ -95,6 +183,9 @@ if(mysqli_connect_errno()){
 				<th>First Name</th>
                 <th>Last Name</th>
                 <th>Company Name</th>
+                <th>city</th>
+                <th>state</th>
+                <th>country</th>
                 <th>Address</th>
 				<th>Tel</th>
 				<th>Email</th>
@@ -110,20 +201,25 @@ if(mysqli_connect_errno()){
 					<td><?php echo $row['firstName']; ?></td>
                     <td><?php echo $row['lastName']; ?></td>
 					<td><?php echo $row['comName']; ?></td>
+                    <td><?php echo $row['city']; ?></td>
+                    <td><?php echo $row['state']; ?></td>
+                    <td><?php echo $row['country']; ?></td>
 					<td><?php echo $row['address']; ?></td>
-					<td><?php echo $row['teleNumber']; ?></td>
 					<td><?php echo $row['email']; ?></td>
+					<td><?php echo $row['teleNumber']; ?></td>
 					<td><?php echo $row['phoneNumber']; ?></td>
-					<td><a href= <?php echo $_SERVER['PHP_SELF']. "?id=" . $row['id'] . "&mode=update" ?>>Update</a>   <a href= <?php echo $_SERVER['PHP_SELF']. "?id=" . $row['id'] ."&mode=delete" ?> >Delete</a></td>
-                    
+					<td><a href= <?php echo "update.php". "?id=" . $row['id']?>>Update</a>   <a href= <?php echo $_SERVER['PHP_SELF']. "?id=" . $row['id'] ."&mode=delete" ?> onclick="deleteevent()">Delete</a></td>
+                
                 <tr>
-            <?php } ?>
+            <?php }
+            ?>
         </tbody>
     </table>
+    <?php echo "<p style='text-align:center;'>$msg</p>" ?>   
 </body>
 </html>
 <style>
-	input[type=text], select, textarea, input[type=email], input[type=city], input[type=number]{
+input[type=text], select, textarea, input[type=email], input[type=city], input[type=number]{
 	width: 100%;
 	padding: 12px;
 	border: 1px solid #ccc;
@@ -132,7 +228,7 @@ if(mysqli_connect_errno()){
 	resize: vertical;
 }
 
-button[type=submit] {
+button[type=submit], #newdata, #filterdata {
   
     cursor: pointer;
     float: right;
@@ -143,15 +239,23 @@ button[type=submit] {
 	box-sizing: border-box;
 	resize: vertical;
 }
-.add, #dataform{
-	width: 40%;	
+.add{
+	width: 80%;	
 	margin-left: auto; 
 	margin-right: auto;
+    
+}
+#dataform, #filterform{
     padding-bottom: 50px;
+    width: 100%;	
+	margin-left: auto; 
+	margin-right: auto;
 }
 
 .view{	
 	margin-left: auto; 
 	margin-right: auto;
 }
+tbody tr {
+        background-color: #f2f2f2;}
 </style>
