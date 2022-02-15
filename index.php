@@ -187,8 +187,8 @@ else{
                 <th>state</th>
                 <th>country</th>
                 <th>Address</th>
+                <th>Email</th>
 				<th>Tel</th>
-				<th>Email</th>
 				<th>Phone</th>
 				<th>Action</th>
             </tr>
