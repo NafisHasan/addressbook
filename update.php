@@ -29,23 +29,6 @@ function legal_input($value) {
     $value = htmlspecialchars($value);
     return $value;
 }
-// function to insert user data into database table
-function insert_data($firstName,$lastName,$comName,$email,$city,$country,$state,$address,$teleNumber,$phoneNumber){
- 
-    global $connectQuery;
-    global $id;
-
-     $query="UPDATE addressbook SET firstName='$firstName',lastName='$lastName',comName='$comName',address='$address',teleNumber=$teleNumber,email='$email',phoneNumber=$phoneNumber,country='$country',city='$city',state='$state' WHERE id=$id";
-
-    $execute=mysqli_query($connectQuery,$query);
-    if($execute==true)
-    {
-      echo "Data was updated successfully";
-    }
-    else{
-     echo  "Error: " . $sql . "<br>" . mysqli_error($connectQuery);
-    }
-}
 if (isset($_POST['firstName'])) {
     $id     = legal_input($_POST['id']);
     $firstName     = legal_input($_POST['firstName']);
@@ -78,6 +61,24 @@ if(!empty($firstName) && !empty($lastName) && !empty($email) && !empty($city) &&
  echo "First Name, Last Name, Email, City, Country, Address fields are required";
 }
  }
+// function to insert user data into database table
+function insert_data($firstName,$lastName,$comName,$email,$city,$country,$state,$address,$teleNumber,$phoneNumber){
+ 
+    global $connectQuery;
+    global $id;
+
+     $query="UPDATE addressbook SET firstName='$firstName',lastName='$lastName',comName='$comName',address='$address',teleNumber=$teleNumber,email='$email',phoneNumber=$phoneNumber,country='$country',city='$city',state='$state' WHERE id=$id";
+
+    $execute=mysqli_query($connectQuery,$query);
+    if($execute==true)
+    {
+      echo "Data was updated successfully. <a href='/index.php'>Return</a>";
+    }
+    else{
+     echo  "Error: " . $sql . "<br>" . mysqli_error($connectQuery);
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -106,7 +107,7 @@ if(!empty($firstName) && !empty($lastName) && !empty($email) && !empty($city) &&
 <title>Address Book</title>
 </head>
 <body>
-<h2 style="color:green;text-align:center;">Update ID: <?php echo $id?></h2>
+<h2 style="color:green;text-align:center;">Update ID:<?php echo $id?></h2>
 <?php echo "<p style='text-align:center;'>$msg</p>" ?>
 <div class="add" >
     <p id="msg" style="text-align:center;"></p>

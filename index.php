@@ -88,8 +88,9 @@ else{
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 	<script>
-        function deleteevent() {
-            window.location.reload(true);
+            
+        if(typeof window.history.pushState == 'function') {
+        window.history.pushState({}, "Hide", '<?php echo $_SERVER['PHP_SELF'];?>');
         }
 		$(document).ready(function(){
         $("#newdata").click(function(){
@@ -187,8 +188,8 @@ else{
                 <th>state</th>
                 <th>country</th>
                 <th>Address</th>
-                <th>Email</th>
 				<th>Tel</th>
+				<th>Email</th>
 				<th>Phone</th>
 				<th>Action</th>
             </tr>
@@ -208,7 +209,7 @@ else{
 					<td><?php echo $row['email']; ?></td>
 					<td><?php echo $row['teleNumber']; ?></td>
 					<td><?php echo $row['phoneNumber']; ?></td>
-					<td><a href= <?php echo "update.php". "?id=" . $row['id']?>>Update</a>   <a href= <?php echo $_SERVER['PHP_SELF']. "?id=" . $row['id'] ."&mode=delete" ?> onclick="deleteevent()">Delete</a></td>
+					<td><a href= <?php echo "update.php". "?id=" . $row['id']?>>Update</a>   <a href= <?php echo $_SERVER['PHP_SELF']. "?id=" . $row['id'] ."&mode=delete" ?>>Delete</a></td>
                 
                 <tr>
             <?php }
